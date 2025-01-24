@@ -1,39 +1,52 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import Colors from "@/constants/Colors";
+import { Tabs } from "expo-router";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Tabs
+      screenOptions={{
+        headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: Colors.light.background,
+        },
+        headerTitleAlign: "center",
+        headerTintColor: Colors.light.text,
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+        tabBarStyle: {
+          backgroundColor: Colors.light.background,
+          borderTopColor: Colors.light.text,
+          borderTopWidth: 1,
+        },
+        tabBarActiveTintColor: Colors.light.tabIconSelected,
+        tabBarInactiveTintColor: Colors.light.tabIconDefault,
+      }}
+    >
+      <Tabs.Screen
+        name="films"
+        options={{
+          title: "All Films",
+          tabBarLabel: "Films",
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: "Favorites",
+          tabBarLabel: "Favorites",
+        }}
+      />
+
+      <Tabs.Screen
+        name="details"
+        options={{
+          title: "Details",
+          tabBarLabel: "Details",
+        }}
+      />
+    </Tabs>
   );
 }
