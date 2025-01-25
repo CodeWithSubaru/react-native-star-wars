@@ -13,50 +13,40 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FAVORITE_KEY } from "@/constants/StorageKey";
+import RenderItem from "@/components/RenderItem";
+import useApi from "@/hooks/useApi";
 
 const Page = () => {
   const { id } = useLocalSearchParams();
-  const [film, setFilm] = useState<IFilm | null>(null);
-  const [refresh, setRefresh] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const {
+    data: film,
+    loading,
+    refresh,
+    fetchItems: fetchFilm,
+    onRefresh,
+  } = useApi<IFilm>(
+    `https://swapi.dev/api/films/${id}`,
+    null,
+    true,
+    async (film: IFilm) => {
+      try {
+        const favorites = await AsyncStorage.getItem(FAVORITE_KEY);
 
-  const fetchFilm = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://swapi.dev/api/films/${id}`);
-      const data = await response.json();
-      setFilm(data);
-      checkFavoriteStatus(data);
-    } catch (err) {
-      console.log("Error: ", err);
-    } finally {
-      setLoading(false);
-      setRefresh(false);
-    }
-  };
-
-  const onRefresh = () => {
-    setRefresh(true);
-    fetchFilm();
-  };
-
-  const checkFavoriteStatus = async (film: IFilm) => {
-    try {
-      const favorites = await AsyncStorage.getItem(FAVORITE_KEY);
-
-      if (favorites) {
-        const favoriteFilms = JSON.parse(favorites) as IFilm[];
-        setIsFavorite(
-          favoriteFilms.some(
-            (favorite: IFilm) => favorite.episode_id === film.episode_id
-          )
-        );
+        if (favorites) {
+          const favoriteFilms = JSON.parse(favorites) as IFilm[];
+          setIsFavorite(
+            favoriteFilms.some(
+              (favorite: IFilm) => favorite.episode_id === film.episode_id
+            )
+          );
+        }
+      } catch (err) {
+        console.log("Error: ", err);
       }
-    } catch (err) {
-      console.log("Error: ", err);
     }
-  };
+  );
+
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const toggleFavorite = async () => {
     try {
@@ -83,25 +73,10 @@ const Page = () => {
     }, [])
   );
 
-  if (loading) {
-    return (
-      <View>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (!film) {
-    return (
-      <View>
-        <Text>Film not found...</Text>
-      </View>
-    );
-  }
-
   return (
-    <ScrollView
-      style={styles.container}
+    <RenderItem
+      item={film}
+      loading={loading}
       refreshControl={
         <RefreshControl
           refreshing={refresh}
@@ -123,13 +98,13 @@ const Page = () => {
           ),
         }}
       />
-      <Text style={styles.title}>{film.title}</Text>
-      <Text style={styles.details}>Episode: {film.episode_id}</Text>
-      <Text style={styles.details}>Director: {film.director}</Text>
-      <Text style={styles.details}>Producer: {film.producer}</Text>
-      <Text style={styles.details}>Release Date: {film.release_date}</Text>
-      <Text style={styles.crawl}>{film.opening_crawl}</Text>
-    </ScrollView>
+      <Text style={styles.title}>{film?.title}</Text>
+      <Text style={styles.details}>Episode: {film?.episode_id}</Text>
+      <Text style={styles.details}>Director: {film?.director}</Text>
+      <Text style={styles.details}>Producer: {film?.producer}</Text>
+      <Text style={styles.details}>Release Date: {film?.release_date}</Text>
+      <Text style={styles.crawl}>{film?.opening_crawl}</Text>
+    </RenderItem>
   );
 };
 export default Page;

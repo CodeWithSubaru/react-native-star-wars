@@ -41,6 +41,15 @@ export default function RootLayout() {
       />
 
       <Tabs.Screen
+        name="people"
+        options={{
+          title: "All Characters",
+          tabBarLabel: "Characters",
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
         name="details"
         options={{
           title: "Details",
