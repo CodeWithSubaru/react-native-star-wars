@@ -4,7 +4,7 @@ const useApi = <T>(
   url: string,
   initialState: T | null = null,
   singleFetch: boolean = false,
-  fn: any
+  fn?: any
 ) => {
   const [data, setData] = useState<T | null>(initialState);
   const [loading, setLoading] = useState(false);
